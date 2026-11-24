@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" type="image/png" href="./icon.png" />
+  <link rel="apple-touch-icon" href="./icon.png" />
+  <title>Gökyüzü — Yıldız Eşleşmesi</title>
+  <style>
+    :root {
+      --bg-deep: #090716;
+      --bg-mid: #1a0f2e;
+      --bg-glow: rgba(255, 77, 141, 0.18);
+      --card: rgba(24, 14, 42, 0.84);
+      --card-solid: #1b1030;
+      --border: rgba(255, 126, 182, 0.34);
+      --accent: #ff4d8d;
+      --accent-soft: #ff9ec4;
+      --gold: #ffd166;
+      --green: #4ade80;
+      --text: #fff8fb;
+      --muted: #d8c7d4;
+      --btn-grad: linear-gradient(135deg, #ff4d8d, #c026d3);
+      --btn-shadow: rgba(255, 77, 141, 0.35);
+      --tab-active-bg: linear-gradient(135deg, rgba(255, 77, 141, 0.34), rgba(192, 38, 211, 0.28));
+      --btn-mini-bg: rgba(255, 77, 141, 0.22);
+      --badge-bg: rgba(255, 77, 141, 0.18);
+      --badge-border: rgba(255, 158, 196, 0.42);
+      --title-grad: linear-gradient(90deg, #fff5f9, #ff9ec4, #ffd166);
+      --banner-bg: linear-gradient(160deg, rgba(34, 15, 56, 0.97), rgba(56, 17, 52, 0.97));
+      --banner-border: #ff9ec4;
+      --banner-shadow: rgba(255, 77, 141, 0.35);
+      --chat-msg-bg: rgba(255, 77, 141, 0.16);
+      --chat-msg-border: rgba(255, 158, 196, 0.28);
+      --chat-mine-bg: rgba(255, 209, 102, 0.14);
+      --chat-mine-border: rgba(255, 209, 102, 0.35);
+    }
+
+    body.theme-emre {
+      --bg-deep: #000000;
+      --bg-mid: #0a0a0c;
+      --bg-glow: rgba(255, 255, 255, 0.05);
+      --card: rgba(14, 14, 16, 0.88);
+      --card-solid: #0f0f12;
+      --border: rgba(255, 255, 255, 0.18);
+      --accent: #e5e7eb;
+      --accent-soft: #9ca3af;
+      --gold: #f8fafc;
+      --green: #4ade80;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --btn-grad: linear-gradient(135deg, #27272a, #09090b);
+      --btn-shadow: rgba(0, 0, 0, 0.65);
+      --tab-active-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+      --btn-mini-bg: rgba(255, 255, 255, 0.1);
+      --badge-bg: rgba(255, 255, 255, 0.08);
+      --badge-border: rgba(255, 255, 255, 0.2);
+      --title-grad: linear-gradient(90deg, #ffffff, #d1d5db, #9ca3af);
+      --banner-bg: linear-gradient(160deg, rgba(16, 16, 18, 0.98), rgba(8, 8, 10, 0.98));
+      --banner-border: rgba(255, 255, 255, 0.28);
+      --banner-shadow: rgba(0, 0, 0, 0.75);
+      --chat-msg-bg: rgba(255, 255, 255, 0.08);
+      --chat-msg-border: rgba(255, 255, 255, 0.16);
+      --chat-mine-bg: rgba(255, 255, 255, 0.15);
+      --chat-mine-border: rgba(255, 255, 255, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      inset: 0;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: auto;
+      background:
+        radial-gradient(circle at 50% 18%, var(--bg-glow) 0%, transparent 48%),
+        radial-gradient(circle at 50% 30%, var(--bg-mid) 0%, var(--bg-deep) 85%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .polka-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.11;
+      background-image: radial-gradient(var(--accent-soft) 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      transition: opacity 0.25s ease;
+    }
+
+    body.theme-emre .polka-layer {
+      opacity: 0;
+      display: none;
+    }
+
+    canvas#skyCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: transparent;
+      touch-action: none;
+    }
+
+    .ui-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: max(env(safe-area-inset-top, 14px), 14px) 14px max(env(safe-area-inset-bottom, 14px), 14px);
+      overscroll-behavior: none;
+      touch-action: none;
+      pointer-events: none;
+    }
+
+    .pointer {
+      pointer-events: auto;
+    }
+
+    .bow-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: var(--accent-soft);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .room-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .room-badge span:last-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .dot.online { background: var(--green); color: var(--green); }
+    .dot.locked { background: var(--gold); color: var(--gold); }
+
+    .btn-mini {
+      min-height: 36px;
+      background: var(--btn-mini-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-mini:active {
+      transform: scale(0.97);
+    }
+
+    .setup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: rgba(5, 5, 10, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .setup-overlay.hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
+    .setup-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--card-solid);
+      border: 1.5px solid var(--border);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    .setup-card h1 {
+      margin: 10px 0 6px;
+      font-size: 23px;
+      font-weight: 800;
+      background: var(--title-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .setup-card p {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 13px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 14px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: rgba(6, 6, 12, 0.92);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .btn-primary {
+      width: 100%;
+      min-height: 48px;
+      padding: 14px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      background: var(--btn-grad);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 10px 26px var(--btn-shadow);
+      touch-action: manipulation;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .bottom-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 22px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: rgba(6, 6, 12, 0.72);
+      padding: 4px;
+      border-radius: 13px;
+    }
+
+    .tab-btn {
+      min-height: 36px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 7px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--tab-active-bg);
+      color: #fff;
+    }
+
+    .star-scroller {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .star-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .star-chip {
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .star-chip.selected {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .star-chip.common {
+      border-left: 3px solid var(--green);
+    }
+
+    .star-chip.has-note {
+      border-color: var(--accent);
+      background: var(--badge-bg);
+    }
+
+    .star-chip.unread {
+      box-shadow: 0 0 0 1px var(--accent), 0 0 14px var(--btn-shadow);
+    }
+
+    .notif-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff3b5c;
+      box-shadow: 0 0 8px #ff3b5c;
+      flex-shrink: 0;
+      animation: notifPulse 1.4s infinite ease-in-out;
+    }
+
+    body.theme-emre .notif-dot {
+      background: #ffffff;
+      box-shadow: 0 0 8px #ffffff;
+    }
+
+    .notif-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      background: #ff3b5c;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    body.theme-emre .notif-pill {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    @keyframes notifPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.72; }
+    }
+
+    .telemetry {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .match-banner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.94);
+      z-index: 15;
+      width: 92%;
+      max-width: 365px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--banner-bg);
+      border: 1.5px solid var(--banner-border);
+      border-radius: 26px;
+      padding: 18px 18px 20px;
+      text-align: left;
+      box-shadow: 0 18px 50px var(--banner-shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .match-banner.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .match-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      flex-shrink: 0;
+    }
+
+    .match-banner h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: var(--gold);
+    }
+
+    .match-banner p {
+      margin: 0 0 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .star-chat-feed {
+      flex: 1;
+      min-height: 110px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 16px;
+      background: rgba(6, 6, 12, 0.72);
+      border: 1px solid var(--border);
+      touch-action: pan-y;
+    }
+
+    .chat-empty {
+      margin: auto;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 6px;
+    }
+
+    .chat-msg {
+      padding: 8px 11px;
+      border-radius: 14px;
+      background: var(--chat-msg-bg);
+      border: 1px solid var(--chat-msg-border);
+    }
+
+    .chat-msg.mine {
+      background: var(--chat-mine-bg);
+      border-color: var(--chat-mine-border);
+    }
+
+    .chat-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      color: var(--accent-soft);
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+
+    .chat-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.38;
+      word-break: break-word;
+    }
+
+    .note-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .note-row input {
+      flex: 1;
+      min-height: 40px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(6, 6, 12, 0.78);
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+  </style>
+</head>
+<body class="theme-emre">
+
+  <div class="polka-layer"></div>
+  <canvas id="skyCanvas"></canvas>
+
+  <div class="setup-overlay" id="setupOverlay">
+    <div class="setup-card">
+      <div class="bow-badge" id="setupBadge">GECE GÖKYÜZÜ MODU</div>
+      <h1>Aynı Yıldızın Altında</h1>
+      <p>Parmağınla gökyüzünü sürükle; bulunduğun konumda ve saatte gökyüzünde gerçekten bulunan yıldızları hedefle.</p>
+
+      <div class="field">
+        <label>Kim Giriş Yapıyor?</label>
+        <select id="userName">
+          <option value="Emre">Emre</option>
+          <option value="Aleyna">Aleyna</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Ortak Oda Kodu (İkiniz de aynı yazın)</label>
+        <input type="text" id="roomCode" value="YILDIZ-2026" style="text-transform:uppercase;" />
+      </div>
+
+      <div class="field">
+        <label>Eşleşme Modu</label>
+        <select id="initialMode">
+          <option value="shared">1. Ortak Seçilen Yıldızı Hedefle</option>
+          <option value="live">2. Gökyüzünde Anlık Ortak Yıldız Yakala</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-primary" id="startBtn">Gökyüzünü Aç</button>
+    </div>
+  </div>
+
+  <div class="match-banner" id="matchBanner" role="dialog" aria-modal="true" aria-labelledby="matchTitle">
+    <div class="match-header">
+      <span class="bow-badge" id="bannerBadge">24 SAATLİK YILDIZ NOTU</span>
+      <button type="button" class="close-btn" id="closeBannerBtn" aria-label="Kutuyu kapat">×</button>
+    </div>
+    <h2 id="matchTitle">Yıldız Notları</h2>
+    <p id="matchDesc">Bu yıldıza bırakılan notlar 24 saat boyunca burada kalır, ardından silinir.</p>
+
+    <div class="star-chat-feed" id="starChatFeed">
+      <div class="chat-empty">Bu yıldıza henüz 24 saatlik bir not bırakılmamış.</div>
+    </div>
+
+    <div class="note-row">
+      <input type="text" id="loveNoteInput" placeholder="2. kişi girmese de not bırak..." />
+      <button type="button" class="btn-mini" id="sendNoteBtn">Gönder</button>
+    </div>
+  </div>
+
+  <div class="ui-layer">
+    <div class="top-bar pointer">
+      <div class="room-badge">
+        <span class="dot" id="partnerDot"></span>
+        <span id="partnerStatusText">Partner bekleniyor...</span>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn-mini" id="starChatBtn">Yıldız Notu</button>
+      </div>
+    </div>
+
+    <div class="bottom-panel pointer">
+      <div class="mode-tabs">
+        <button type="button" class="tab-btn active" id="tabShared">Ortak Yıldız Seç</button>
+        <button type="button" class="tab-btn" id="tabLive">Serbest Gökyüzü Hedefle</button>
+      </div>
+
+      <div id="modeHint" style="font-size:12px; color:var(--muted);">
+        Target yıldızın üzerine gelince otomatik seçilir veya aşağıdan seçince target oraya gider:
+      </div>
+
+      <div class="star-scroller" id="starList"></div>
+
+      <div class="telemetry">
+        <span id="sensorReadout">Yön: 0° | Yükseklik: 35°</span>
+        <span id="targetReadout">Hedef: —</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+const FIREBASE_URL = "https://yildizz-5cf4f-default-rtdb.firebaseio.com";
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+const REAL_STARS = [
+  { id: "sirius",     name: "Sirius",     tr: "Akyıldız",       ra: 6.7525,  dec: -16.7161, mag: -1.46 },
+  { id: "canopus",    name: "Canopus",    tr: "Süheyl",         ra: 6.3992,  dec: -52.6957, mag: -0.74 },
+  { id: "arcturus",   name: "Arcturus",   tr: "Çoban Yıldızı",  ra: 14.2610, dec:  19.1824, mag: -0.05 },
+  { id: "vega",       name: "Vega",       tr: "Çalgı Yıldızı",  ra: 18.6156, dec:  38.7837, mag:  0.03 },
+  { id: "capella",    name: "Capella",    tr: "Araba Yıldızı",  ra: 5.2781,  dec:  45.9980, mag:  0.08 },
+  { id: "rigel",      name: "Rigel",      tr: "Avcı'nın Ayağı", ra: 5.2423,  dec:  -8.2016, mag:  0.13 },
+  { id: "procyon",    name: "Procyon",    tr: "Küçük Köpek",    ra: 7.6550,  dec:   5.2250, mag:  0.34 },
+  { id: "betelgeuse", name: "Betelgeuse", tr: "Avcı'nın Omzu",  ra: 5.9195,  dec:   7.4071, mag:  0.42 },
+  { id: "altair",     name: "Altair",     tr: "Uçan Kartal",    ra: 19.8464, dec:   8.8683, mag:  0.76 },
+  { id: "aldebaran",  name: "Aldebaran",  tr: "Boğa'nın Gözü",  ra: 4.5987,  dec:  16.5093, mag:  0.86 },
+  { id: "antares",    name: "Antares",    tr: "Akrep Kalbi",    ra: 16.4901, dec: -26.4320, mag:  0.96 },
+  { id: "spica",      name: "Spica",      tr: "Başak Yıldızı",  ra: 13.4199, dec: -11.1614, mag:  0.97 },
+  { id: "pollux",     name: "Pollux",     tr: "İkizler",        ra: 7.7553,  dec:  28.0262, mag:  1.14 },
+  { id: "fomalhaut",  name: "Fomalhaut",  tr: "Güney Balığı",   ra: 22.9608, dec: -29.6222, mag:  1.16 },
+  { id: "deneb",      name: "Deneb",      tr: "Kuğu Kuyruğu",   ra: 20.6905, dec:  45.2803, mag:  1.25 },
+  { id: "regulus",    name: "Regulus",    tr: "Aslan Kalbi",    ra: 10.1395, dec:  11.9672, mag:  1.35 },
+  { id: "castor",     name: "Castor",     tr: "İkizler",        ra: 7.5767,  dec:  31.8883, mag:  1.58 },
+  { id: "bellatrix",  name: "Bellatrix",  tr: "Avcı Sol Omuz",  ra: 5.4188,  dec:   6.3497, mag:  1.64 },
+  { id: "elnath",     name: "Elnath",     tr: "Boğa Boynuzu",   ra: 5.4382,  dec:  28.6075, mag:  1.65 },
+  { id: "alnilam",    name: "Alnilam",    tr: "Avcı Kemeri",    ra: 5.6036,  dec:  -1.2019, mag:  1.69 },
+  { id: "alitak",     name: "Alnitak",    tr: "Avcı Kemeri",    ra: 5.6793,  dec:  -1.9426, mag:  1.77 },
+  { id: "mintaka",    name: "Mintaka",    tr: "Avcı Kemeri",    ra: 5.5334,  dec:  -0.2991, mag:  2.23 },
+  { id: "saiph",      name: "Saiph",      tr: "Avcı Sağ Ayak",  ra: 5.7959,  dec:  -9.6696, mag:  2.09 },
+  { id: "dubhe",      name: "Dubhe",      tr: "Büyük Ayı",      ra: 11.0621, dec:  61.7510, mag:  1.79 },
+  { id: "merak",      name: "Merak",      tr: "Büyük Ayı",      ra: 11.0307, dec:  56.3824, mag:  2.37 },
+  { id: "alioth",     name: "Alioth",     tr: "Büyük Ayı",      ra: 12.9005, dec:  55.9598, mag:  1.77 },
+  { id: "alkaid",     name: "Alkaid",     tr: "Büyük Ayı",      ra: 13.7923, dec:  49.3133, mag:  1.86 },
+  { id: "polaris",    name: "Polaris",    tr: "Kutup Yıldızı",  ra: 2.5303,  dec:  89.2641, mag:  1.98 },
+  { id: "mirfak",     name: "Mirfak",     tr: "Kahraman",       ra: 3.4054,  dec:  49.8612, mag:  1.80 },
+  { id: "hamal",      name: "Hamal",      tr: "Koç Yıldızı",    ra: 2.1195,  dec:  23.4624, mag:  2.00 }
+];
+
+const CONSTELLATIONS = [
+  ["betelgeuse", "bellatrix"], ["bellatrix", "mintaka"], ["mintaka", "alnilam"],
+  ["alnilam", "alitak"], ["alitak", "betelgeuse"], ["mintaka", "rigel"],
+  ["alitak", "saiph"], ["rigel", "saiph"],
+  ["vega", "deneb"], ["deneb", "altair"], ["altair", "vega"],
+  ["sirius", "rigel"], ["rigel", "aldebaran"], ["aldebaran", "capella"],
+  ["capella", "pollux"], ["pollux", "procyon"], ["procyon", "sirius"],
+  ["dubhe", "merak"], ["dubhe", "alioth"], ["alioth", "alkaid"]
+];
+
+const state = {
+  userId: "u_" + Math.random().toString(36).slice(2, 8),
+  userName: "Emre",
+  roomCode: "YILDIZ-2026",
+  mode: "shared",
+  lat: 47.2692,
+  lon: 11.4041,
+  heading: 0,
+  smoothHeading: 0,
+  pitch: 35,
+  smoothPitch: 35,
+  selectedStarId: null,
+  lockedStarId: null,
+  activeChatStarId: null,
+  partner: null,
+  lastVibrate: 0,
+  loopStarted: false,
+  bannerDismissedKey: null,
+  manualChatOpen: false,
+  autoPanTargetStarId: null,
+  lastAutoSelectStarId: null,
+  starChatsByRoom: {},
+  lastSeenStarTimestamp: {}
+};
+
+function isEmreTheme() {
+  return state.userName === "Emre";
+}
+
+function applyThemeByUser(name) {
+  state.userName = name === "Aleyna" ? "Aleyna" : "Emre";
+  const isEmre = isEmreTheme();
+  document.body.classList.toggle("theme-emre", isEmre);
+
+  const setupBadge = document.getElementById("setupBadge");
+  const bannerBadge = document.getElementById("bannerBadge");
+  if (setupBadge) {
+    setupBadge.textContent = isEmre ? "GECE GÖKYÜZÜ MODU" : "🎀 MINNIE GÖKYÜZÜ TEMASI";
+  }
+  if (bannerBadge) {
+    bannerBadge.textContent = isEmre ? "24 SAATLİK YILDIZ NOTU" : "🎀 24 SAATLİK YILDIZ NOTU";
+  }
+  document.title = isEmre ? "Gece Gökyüzü — Yıldız Eşleşmesi" : "Minnie'nin Gökyüzü — Yıldız Eşleşmesi";
+}
+
+document.getElementById("userName").addEventListener("change", (e) => {
+  applyThemeByUser(e.target.value);
+});
+applyThemeByUser("Emre");
+
+let startTouchY = 0;
+window.addEventListener("touchstart", (e) => {
+  if (e.touches && e.touches.length === 1) {
+    startTouchY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+window.addEventListener("touchmove", (e) => {
+  if (e.target && e.target.closest && e.target.closest(".star-chat-feed")) {
+    return;
+  }
+  if (!e.touches || e.touches.length !== 1) return;
+  const currentY = e.touches[0].clientY;
+  if (currentY > startTouchY) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+function getLocalStorageChatKey() {
+  return `sky_star_chats_${state.roomCode}`;
+}
+
+function getLocalStorageSeenKey() {
+  return `sky_star_seen_${state.roomCode}_${state.userName}`;
+}
+
+function pruneExpiredMessages(list) {
+  const now = Date.now();
+  return (Array.isArray(list) ? list : [])
+    .filter((m) => m && typeof m.expiresAt === "number" && m.expiresAt > now)
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+
+function loadLocalChats() {
+  try {
+    const raw = localStorage.getItem(getLocalStorageChatKey());
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    const cleaned = {};
+    Object.entries(parsed || {}).forEach(([starId, msgs]) => {
+      const valid = pruneExpiredMessages(msgs);
+      if (valid.length > 0) cleaned[starId] = valid;
+    });
+    return cleaned;
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveLocalChats() {
+  try {
+    localStorage.setItem(getLocalStorageChatKey(), JSON.stringify(state.starChatsByRoom));
+  } catch (e) {}
+}
+
+function loadSeenTimestamps() {
+  try {
+    const raw = localStorage.getItem(getLocalStorageSeenKey());
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveSeenTimestamps() {
+  try {
+    localStorage.setItem(getLocalStorageSeenKey(), JSON.stringify(state.lastSeenStarTimestamp));
+  } catch (e) {}
+}
+
+function getStarNoteStats(starId) {
+  const msgs = pruneExpiredMessages(state.starChatsByRoom[starId] || []);
+  const latestAt = msgs.length > 0 ? Math.max(...msgs.map((m) => m.createdAt || 0)) : 0;
+  const seenAt = state.lastSeenStarTimestamp[starId] || 0;
+  const unreadMsgs = msgs.filter((m) => (m.createdAt || 0) > seenAt && m.byId !== state.userId);
+  return {
+    totalCount: msgs.length,
+    unreadCount: unreadMsgs.length,
+    hasUnread: unreadMsgs.length > 0,
+    latestAt
+  };
+}
+
+async function syncAppIconBadge() {
+  if (!("setAppBadge" in navigator) || !("clearAppBadge" in navigator)) {
+    return;
+  }
+
+  let totalUnread = 0;
+  REAL_STARS.forEach((star) => {
+    totalUnread += getStarNoteStats(star.id).unreadCount;
+  });
+
+  try {
+    if (totalUnread > 0) {
+      await navigator.setAppBadge(totalUnread);
+    } else {
+      await navigator.clearAppBadge();
+    }
+  } catch (e) {}
+}
+
+function markStarAsSeen(starId, skipRender = false) {
+  if (!starId) return;
+  const msgs = pruneExpiredMessages(state.starChatsByRoom[starId] || []);
+  const latestAt = msgs.length > 0 ? Math.max(...msgs.map((m) => m.createdAt || 0)) : Date.now();
+  state.lastSeenStarTimestamp[starId] = Math.max(state.lastSeenStarTimestamp[starId] || 0, latestAt, Date.now());
+  saveSeenTimestamps();
+  syncAppIconBadge();
+  if (!skipRender) {
+    renderStarList();
+  }
+}
+
+function formatRemainingTime(expiresAt) {
+  const diffMs = Math.max(0, expiresAt - Date.now());
+  const totalHours = Math.floor(diffMs / (60 * 60 * 1000));
+  const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+  if (totalHours > 0) return `${totalHours}s ${mins}dk kaldı`;
+  return `${Math.max(1, mins)}dk kaldı`;
+}
+
+function getCurrentStarForChat() {
+  const id = state.activeChatStarId || state.lockedStarId || state.selectedStarId || REAL_STARS[0].id;
+  return REAL_STARS.find((s) => s.id === id) || REAL_STARS[0];
+}
+
+function renderStarChatFeed() {
+  const feed = document.getElementById("starChatFeed");
+  const titleEl = document.getElementById("matchTitle");
+  const descEl = document.getElementById("matchDesc");
+  if (!feed) return;
+
+  const starObj = getCurrentStarForChat();
+  const list = pruneExpiredMessages(state.starChatsByRoom[starObj.id] || []);
+  state.starChatsByRoom[starObj.id] = list;
+  saveLocalChats();
+
+  if (titleEl) {
+    titleEl.textContent = isEmreTheme()
+      ? `${starObj.name} (${starObj.tr})`
+      : `✨ ${starObj.name} (${starObj.tr})`;
+  }
+  if (descEl) {
+    const isMatchedNow = !!(state.lockedStarId && state.partner && state.partner.lockedStarId === state.lockedStarId && state.lockedStarId === starObj.id);
+    descEl.textContent = isMatchedNow
+      ? `${state.partner.name} ile bu yıldızda buluştunuz! Notlar 24 saat boyunca kalır.`
+      : `2. kişi girmese bile not bırakabilirsin. Bu yıldızdaki notlar 24 saat sonra otomatik silinir.`;
+  }
+
+  feed.innerHTML = "";
+  if (list.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "chat-empty";
+    empty.textContent = `${starObj.name} yıldızına henüz 24 saatlik not bırakılmamış. İlk notu sen yaz.`;
+    feed.appendChild(empty);
+    syncAppIconBadge();
+    return;
+  }
+
+  list.forEach((msg) => {
+    const item = document.createElement("div");
+    item.className = "chat-msg" + (msg.byId === state.userId ? " mine" : "");
+
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    const sender = document.createElement("span");
+    sender.textContent = msg.by || "Gökyüzü Yolcusu";
+    const rem = document.createElement("span");
+    rem.textContent = formatRemainingTime(msg.expiresAt);
+    meta.appendChild(sender);
+    meta.appendChild(rem);
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "chat-text";
+    textDiv.textContent = msg.text;
+
+    item.appendChild(meta);
+    item.appendChild(textDiv);
+    feed.appendChild(item);
+  });
+
+  feed.scrollTop = feed.scrollHeight;
+  syncAppIconBadge();
+}
+
+function openStarChatModal(starIdOverride = null) {
+  const starObj = starIdOverride
+    ? (REAL_STARS.find((s) => s.id === starIdOverride) || getCurrentStarForChat())
+    : getCurrentStarForChat();
+
+  state.selectedStarId = starObj.id;
+  state.activeChatStarId = starObj.id;
+  state.manualChatOpen = true;
+  markStarAsSeen(starObj.id, false);
+  renderStarChatFeed();
+  document.getElementById("matchBanner").classList.add("show");
+}
+
+function getStarHorizontalCoords(star, lat, lon, date = new Date()) {
+  const rad = Math.PI / 180;
+  const deg = 180 / Math.PI;
+
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  const d = jd - 2451545.0;
+  let gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+  if (gmst < 0) gmst += 24;
+
+  let lst = (gmst + lon / 15) % 24;
+  if (lst < 0) lst += 24;
+
+  let ha = (lst - star.ra) * 15;
+  if (ha < -180) ha += 360;
+  if (ha > 180) ha -= 360;
+
+  const latR = lat * rad;
+  const decR = star.dec * rad;
+  const haR = ha * rad;
+
+  const sinAlt = Math.sin(decR) * Math.sin(latR) + Math.cos(decR) * Math.cos(latR) * Math.cos(haR);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt))) * deg;
+
+  const cosAz = (Math.sin(decR) - Math.sin(alt * rad) * Math.sin(latR)) / (Math.cos(alt * rad) * Math.cos(latR));
+  let az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * deg;
+  if (Math.sin(haR) > 0) az = 360 - az;
+
+  return { az, alt };
+}
+
+function sphericalAngle(az1, alt1, az2, alt2) {
+  const rad = Math.PI / 180;
+  const a1 = alt1 * rad, a2 = alt2 * rad;
+  const dAz = (az1 - az2) * rad;
+  const cosTheta = Math.sin(a1) * Math.sin(a2) + Math.cos(a1) * Math.cos(a2) * Math.cos(dAz);
+  return Math.acos(Math.max(-1, Math.min(1, cosTheta))) * (180 / Math.PI);
+}
+
+function aimTargetAtStar(starId, smooth = true) {
+  const star = REAL_STARS.find((s) => s.id === starId);
+  if (!star) return;
+  const pos = getStarHorizontalCoords(star, state.lat, state.lon, new Date());
+  if (pos.alt <= 0) return;
+
+  const targetAz = (pos.az + 360) % 360;
+  const targetAlt = Math.max(-25, Math.min(90, pos.alt));
+
+  state.heading = targetAz;
+  state.pitch = targetAlt;
+  state.autoPanTargetStarId = starId;
+
+  if (!smooth) {
+    state.smoothHeading = targetAz;
+    state.smoothPitch = targetAlt;
+  }
+}
+
+function autoPickVisibleStar() {
+  const now = new Date();
+  const visible = REAL_STARS
+    .map(s => ({ s, pos: getStarHorizontalCoords(s, state.lat, state.lon, now) }))
+    .filter(item => item.pos.alt > 5)
+    .sort((a, b) => a.s.mag - b.s.mag);
+
+  if (visible.length > 0 && !state.selectedStarId) {
+    state.selectedStarId = visible[0].s.id;
+    state.activeChatStarId = visible[0].s.id;
+    aimTargetAtStar(visible[0].s.id, false);
+  }
+}
+
+function initLocationBackground() {
+  try {
+    autoPickVisibleStar();
+    renderStarList();
+    if (!("geolocation" in navigator)) return;
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.lat = pos.coords.latitude;
+        state.lon = pos.coords.longitude;
+        autoPickVisibleStar();
+        renderStarList();
+      },
+      () => {
+        autoPickVisibleStar();
+        renderStarList();
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  } catch (e) {}
+}
+
+function lerpAngle(a, b, t) {
+  let diff = ((b - a + 540) % 360) - 180;
+  return (a + diff * t + 360) % 360;
+}
+
+function renderStarList() {
+  try {
+    const container = document.getElementById("starList");
+    if (!container) return;
+    container.innerHTML = "";
+    const now = new Date();
+
+    const visibleStars = REAL_STARS
+      .map(star => {
+        const myPos = getStarHorizontalCoords(star, state.lat, state.lon, now);
+        let partnerVisible = true;
+        if (state.partner && state.partner.lat) {
+          const pPos = getStarHorizontalCoords(star, state.partner.lat, state.partner.lon, now);
+          partnerVisible = pPos.alt > 0;
+        }
+        const noteStats = getStarNoteStats(star.id);
+        return { star, myPos, bothVisible: myPos.alt > 0 && partnerVisible, noteStats };
+      })
+      .filter(item => item.myPos.alt > 0)
+      .sort((a, b) => {
+        const aHasNotes = a.noteStats.totalCount > 0 ? 1 : 0;
+        const bHasNotes = b.noteStats.totalCount > 0 ? 1 : 0;
+        if (aHasNotes !== bHasNotes) return bHasNotes - aHasNotes;
+
+        if (a.noteStats.hasUnread !== b.noteStats.hasUnread) {
+          return a.noteStats.hasUnread ? -1 : 1;
+        }
+
+        if (aHasNotes && bHasNotes && a.noteStats.latestAt !== b.noteStats.latestAt) {
+          return b.noteStats.latestAt - a.noteStats.latestAt;
+        }
+
+        return a.star.mag - b.star.mag;
+      });
+
+    visibleStars.forEach(({ star, myPos, bothVisible, noteStats }) => {
+      const chip = document.createElement("div");
+      chip.className = "star-chip" +
+        (state.selectedStarId === star.id ? " selected" : "") +
+        (bothVisible ? " common" : "") +
+        (noteStats.totalCount > 0 ? " has-note" : "") +
+        (noteStats.hasUnread ? " unread" : "");
+
+      if (noteStats.hasUnread) {
+        const dot = document.createElement("span");
+        dot.className = "notif-dot";
+        chip.appendChild(dot);
+      }
+
+      const labelSpan = document.createElement("span");
+      labelSpan.innerHTML = `<strong>${star.name}</strong> · ${Math.round(myPos.alt)}°`;
+      chip.appendChild(labelSpan);
+
+      if (noteStats.hasUnread) {
+        const pill = document.createElement("span");
+        pill.className = "notif-pill";
+        pill.textContent = `Yeni ${noteStats.unreadCount}`;
+        chip.appendChild(pill);
+      } else if (noteStats.totalCount > 0) {
+        const countSpan = document.createElement("span");
+        countSpan.textContent = `· ${noteStats.totalCount} not`;
+        chip.appendChild(countSpan);
+      }
+
+      chip.onclick = () => {
+        state.selectedStarId = star.id;
+        state.activeChatStarId = star.id;
+        state.lastAutoSelectStarId = star.id;
+        markStarAsSeen(star.id, true);
+        aimTargetAtStar(star.id, true);
+        renderStarList();
+        syncToCloud(true);
+      };
+      container.appendChild(chip);
+    });
+
+    syncAppIconBadge();
+  } catch (e) {}
+}
+
+async function deleteExpiredStarChatInCloud(room, starId, msgId) {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  try {
+    await fetch(`${base}/rooms/${room}/starChats/${encodeURIComponent(starId)}/${encodeURIComponent(msgId)}.json`, {
+      method: "DELETE"
+    });
+  } catch (e) {}
+}
+
+async function syncToCloud(forceStarSelect = false) {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  const room = encodeURIComponent(state.roomCode);
+
+  const payload = {
+    name: state.userName,
+    lat: state.lat,
+    lon: state.lon,
+    lockedStarId: state.lockedStarId,
+    mode: state.mode,
+    updatedAt: Date.now()
+  };
+
+  try {
+    await fetch(`${base}/rooms/${room}/users/${state.userId}.json`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
+
+    if (forceStarSelect && state.selectedStarId) {
+      await fetch(`${base}/rooms/${room}/sharedStar.json`, {
+        method: "PUT",
+        body: JSON.stringify({ starId: state.selectedStarId, by: state.userName, at: Date.now() })
+      });
+    }
+  } catch (e) {}
+}
+
+async function pollCloud() {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  const room = encodeURIComponent(state.roomCode);
+
+  try {
+    const res = await fetch(`${base}/rooms/${room}.json`);
+    const data = await res.json();
+    if (!data) return;
+
+    if (data.sharedStar && data.sharedStar.starId && state.mode === "shared") {
+      if (state.selectedStarId !== data.sharedStar.starId && !state.autoPanTargetStarId) {
+        state.selectedStarId = data.sharedStar.starId;
+        state.activeChatStarId = data.sharedStar.starId;
+        renderStarList();
+      }
+    }
+
+    if (data.users) {
+      const others = Object.entries(data.users)
+        .filter(([id, u]) => id !== state.userId && (Date.now() - u.updatedAt) < 25000)
+        .map(([, u]) => u);
+
+      if (others.length > 0) {
+        state.partner = others[0];
+        const dot = document.getElementById("partnerDot");
+        const status = document.getElementById("partnerStatusText");
+        dot.className = "dot " + (state.partner.lockedStarId ? "locked" : "online");
+        status.textContent = state.partner.lockedStarId
+          ? `${state.partner.name}: ${state.partner.lockedStarId.toUpperCase()} hedefledi!`
+          : `${state.partner.name} gökyüzüne bakıyor`;
+      } else {
+        state.partner = null;
+        document.getElementById("partnerDot").className = "dot";
+        document.getElementById("partnerStatusText").textContent = "Partner bekleniyor...";
+      }
+    }
+
+    if (data.starChats) {
+      const now = Date.now();
+      const merged = { ...state.starChatsByRoom };
+      const bannerOpen = document.getElementById("matchBanner").classList.contains("show");
+      const currentModalStarId = bannerOpen ? getCurrentStarForChat().id : null;
+
+      Object.entries(data.starChats).forEach(([starId, msgMap]) => {
+        if (!msgMap || typeof msgMap !== "object") return;
+        const validMsgs = [];
+        Object.entries(msgMap).forEach(([msgId, m]) => {
+          if (!m || typeof m.expiresAt !== "number" || m.expiresAt <= now) {
+            deleteExpiredStarChatInCloud(room, starId, msgId);
+          } else {
+            validMsgs.push({ ...m, id: m.id || msgId });
+          }
+        });
+        merged[starId] = validMsgs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      });
+
+      state.starChatsByRoom = merged;
+      saveLocalChats();
+
+      if (currentModalStarId) {
+        markStarAsSeen(currentModalStarId, true);
+        renderStarChatFeed();
+        renderStarList();
+      } else {
+        renderStarList();
+      }
+    }
+  } catch (e) {}
+}
+
+const canvas = document.getElementById("skyCanvas");
+const ctx = canvas.getContext("2d");
+
+let isDragging = false;
+let dragLastX = 0;
+let dragLastY = 0;
+
+canvas.addEventListener("pointerdown", (e) => {
+  isDragging = true;
+  state.autoPanTargetStarId = null;
+  dragLastX = e.clientX;
+  dragLastY = e.clientY;
+});
+
+window.addEventListener("pointermove", (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragLastX;
+  const dy = e.clientY - dragLastY;
+  dragLastX = e.clientX;
+  dragLastY = e.clientY;
+
+  state.heading = (state.heading - dx * 0.28 + 360) % 360;
+  state.pitch = Math.max(-25, Math.min(90, state.pitch + dy * 0.28));
+});
+
+window.addEventListener("pointerup", () => {
+  isDragging = false;
+});
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, window.innerWidth) * dpr;
+  canvas.height = Math.max(1, window.innerHeight) * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+function projectStarToCamera(az, alt) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const hFov = 58;
+  const vFov = hFov * (h / Math.max(1, w));
+
+  let dAz = ((az - state.smoothHeading + 540) % 360) - 180;
+  const cosAlt = Math.max(0.25, Math.cos(state.smoothPitch * Math.PI / 180));
+  const dAlt = alt - state.smoothPitch;
+
+  const x = w / 2 + ((dAz * cosAlt) / (hFov / 2)) * (w / 2);
+  const y = h / 2 - (dAlt / (vFov / 2)) * (h / 2);
+
+  const visible = Math.abs(dAz * cosAlt) < hFov * 0.8 && Math.abs(dAlt) < vFov * 0.8;
+  return { x, y, visible };
+}
+
+function loop() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const emreMode = isEmreTheme();
+  ctx.clearRect(0, 0, w, h);
+
+  if (state.autoPanTargetStarId) {
+    const panStar = REAL_STARS.find((s) => s.id === state.autoPanTargetStarId);
+    if (panStar) {
+      const livePos = getStarHorizontalCoords(panStar, state.lat, state.lon, new Date());
+      if (livePos.alt > 0) {
+        state.heading = (livePos.az + 360) % 360;
+        state.pitch = Math.max(-25, Math.min(90, livePos.alt));
+        const remDist = sphericalAngle(state.smoothHeading, state.smoothPitch, state.heading, state.pitch);
+        if (remDist < 0.35) {
+          state.smoothHeading = state.heading;
+          state.smoothPitch = state.pitch;
+          state.autoPanTargetStarId = null;
+        }
+      } else {
+        state.autoPanTargetStarId = null;
+      }
+    } else {
+      state.autoPanTargetStarId = null;
+    }
+  }
+
+  const factor = isDragging ? 0.45 : (state.autoPanTargetStarId ? 0.16 : 0.24);
+  state.smoothHeading = lerpAngle(state.smoothHeading, state.heading, factor);
+  state.smoothPitch = state.smoothPitch + (state.pitch - state.smoothPitch) * factor;
+
+  const horizonY = projectStarToCamera(state.smoothHeading, 0).y;
+  if (horizonY > -20 && horizonY < h + 20) {
+    ctx.strokeStyle = emreMode ? "rgba(255, 255, 255, 0.16)" : "rgba(255, 158, 196, 0.28)";
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(0, horizonY);
+    ctx.lineTo(w, horizonY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const cardinals = [
+      { label: "KUZEY", az: 0 }, { label: "DOĞU", az: 90 },
+      { label: "GÜNEY", az: 180 }, { label: "BATI", az: 270 }
+    ];
+    ctx.font = "600 10px -apple-system, sans-serif";
+    ctx.fillStyle = emreMode ? "rgba(209, 213, 219, 0.72)" : "rgba(255, 196, 222, 0.78)";
+    cardinals.forEach(c => {
+      const cp = projectStarToCamera(c.az, 1.5);
+      if (cp.visible) ctx.fillText(c.label, cp.x - 16, cp.y);
+    });
+  }
+
+  const now = new Date();
+  const starMap = {};
+  let closestStar = null;
+  let closestDist = 999;
+
+  REAL_STARS.forEach(star => {
+    const pos = getStarHorizontalCoords(star, state.lat, state.lon, now);
+    if (pos.alt <= 0) return;
+
+    const p = projectStarToCamera(pos.az, pos.alt);
+    const dist = sphericalAngle(state.smoothHeading, state.smoothPitch, pos.az, pos.alt);
+    starMap[star.id] = { star, pos, p, dist };
+
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestStar = starMap[star.id];
+    }
+  });
+
+  const LOCK_THRESHOLD = 6.0;
+  let activeCandidate = null;
+  if (closestStar && closestStar.dist <= LOCK_THRESHOLD) {
+    activeCandidate = closestStar.star;
+    if (state.selectedStarId !== activeCandidate.id) {
+      state.selectedStarId = activeCandidate.id;
+      state.activeChatStarId = activeCandidate.id;
+      if (state.lastAutoSelectStarId !== activeCandidate.id) {
+        state.lastAutoSelectStarId = activeCandidate.id;
+        renderStarList();
+        if (state.mode === "shared") {
+          syncToCloud(true);
+        }
+      }
+    }
+  }
+
+  state.lockedStarId = activeCandidate ? activeCandidate.id : null;
+
+  ctx.strokeStyle = emreMode ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 126, 182, 0.28)";
+  ctx.lineWidth = 1.1;
+  CONSTELLATIONS.forEach(([idA, idB]) => {
+    const a = starMap[idA];
+    const b = starMap[idB];
+    if (a && b && (a.p.visible || b.p.visible)) {
+      ctx.beginPath();
+      ctx.moveTo(a.p.x, a.p.y);
+      ctx.lineTo(b.p.x, b.p.y);
+      ctx.stroke();
+    }
+  });
+
+  Object.values(starMap).forEach(({ star, p, dist }) => {
+    const isTarget = (star.id === state.selectedStarId);
+    const isPartnerHere = (state.partner && state.partner.lockedStarId === star.id);
+
+    if (p.visible) {
+      const radius = Math.max(3, 5.6 - star.mag * 1.1);
+      const glowR = isTarget ? 24 : radius * 3.4;
+      const grad = ctx.createRadialGradient(p.x, p.y, 0.5, p.x, p.y, glowR);
+      if (emreMode) {
+        grad.addColorStop(0, isTarget ? "rgba(255, 255, 255, 0.92)" : "rgba(209, 213, 219, 0.55)");
+      } else {
+        grad.addColorStop(0, isTarget ? "rgba(255, 209, 102, 0.9)" : "rgba(255, 180, 215, 0.7)");
+      }
+      grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (isTarget || isPartnerHere) {
+        ctx.strokeStyle = isPartnerHere
+          ? (emreMode ? "#ffffff" : "#ff4d8d")
+          : (emreMode ? "#e5e7eb" : "#ffd166");
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 18 + Math.sin(Date.now() / 200) * 3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = isTarget ? (emreMode ? "#ffffff" : "#ffd166") : "#fff8fb";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = isTarget ? "700 13px -apple-system, sans-serif" : "600 11px -apple-system, sans-serif";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.88)";
+      ctx.fillText(star.name, p.x + 11, p.y + 5);
+      ctx.fillStyle = isTarget ? (emreMode ? "#ffffff" : "#ffd166") : "#fff8fb";
+      ctx.fillText(star.name, p.x + 10, p.y + 4);
+    }
+
+    if (isTarget && dist > 6) {
+      const angle = Math.atan2(p.y - h / 2, p.x - w / 2);
+      const r = Math.min(w, h) * 0.34;
+      const ax = w / 2 + Math.cos(angle) * r;
+      const ay = h / 2 + Math.sin(angle) * r;
+
+      ctx.save();
+      ctx.translate(ax, ay);
+      ctx.rotate(angle);
+      ctx.fillStyle = emreMode ? "#e5e7eb" : "#ff7eb6";
+      ctx.beginPath();
+      ctx.moveTo(13, 0);
+      ctx.lineTo(-8, -7);
+      ctx.lineTo(-4, 0);
+      ctx.lineTo(-8, 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  });
+
+  const cx = w / 2, cy = h / 2;
+
+  if (activeCandidate) {
+    document.getElementById("targetReadout").textContent = `Seçili Yıldız: ${activeCandidate.name}`;
+  } else if (state.selectedStarId && starMap[state.selectedStarId]) {
+    const tItem = starMap[state.selectedStarId];
+    document.getElementById("targetReadout").textContent = `Hedef: ${tItem.star.name} (${Math.round(tItem.dist)}°)`;
+  } else {
+    document.getElementById("targetReadout").textContent = "Yıldıza doğrult...";
+  }
+
+  ctx.strokeStyle = activeCandidate
+    ? "#4ade80"
+    : (emreMode ? "rgba(255, 255, 255, 0.78)" : "rgba(255, 158, 196, 0.82)");
+  ctx.lineWidth = activeCandidate ? 2.5 : 1.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, activeCandidate ? 26 : 22, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx - 32, cy); ctx.lineTo(cx - 14, cy);
+  ctx.moveTo(cx + 14, cy); ctx.lineTo(cx + 32, cy);
+  ctx.moveTo(cx, cy - 32); ctx.lineTo(cx, cy - 14);
+  ctx.moveTo(cx, cy + 14); ctx.lineTo(cx, cy + 32);
+  ctx.stroke();
+
+  const isRealMatch = state.lockedStarId && state.partner && state.partner.lockedStarId === state.lockedStarId;
+  const banner = document.getElementById("matchBanner");
+
+  if (isRealMatch) {
+    const matchKey = `${state.lockedStarId}_${state.partner.name}`;
+    if (state.bannerDismissedKey !== matchKey) {
+      state.activeChatStarId = state.lockedStarId;
+      markStarAsSeen(state.lockedStarId, false);
+      renderStarChatFeed();
+      banner.classList.add("show");
+
+      if (navigator.vibrate && Date.now() - state.lastVibrate > 4000) {
+        navigator.vibrate([120, 60, 180]);
+        state.lastVibrate = Date.now();
+      }
+    }
+  } else {
+    state.bannerDismissedKey = null;
+    if (!state.manualChatOpen) {
+      banner.classList.remove("show");
+    }
+  }
+
+  document.getElementById("sensorReadout").textContent =
+    `Yön: ${Math.round(state.smoothHeading)}° | Yükseklik: ${Math.round(state.smoothPitch)}°`;
+
+  requestAnimationFrame(loop);
+}
+
+function updateModeUI() {
+  document.getElementById("tabShared").classList.toggle("active", state.mode === "shared");
+  document.getElementById("tabLive").classList.toggle("active", state.mode === "live");
+  document.getElementById("modeHint").textContent = state.mode === "shared"
+    ? "Target yıldızın üzerine gelince otomatik seçilir veya aşağıdan seçince target oraya gider:"
+    : "Gökyüzünde gezdir; ikiniz de aynı gerçek yıldızı hedefleyince eşleşin:";
+}
+
+document.getElementById("starChatBtn").onclick = () => {
+  openStarChatModal();
+};
+
+document.getElementById("matchBanner").addEventListener("pointerdown", () => {
+  const starObj = getCurrentStarForChat();
+  if (starObj && getStarNoteStats(starObj.id).hasUnread) {
+    markStarAsSeen(starObj.id, false);
+  }
+});
+
+document.getElementById("closeBannerBtn").onclick = () => {
+  const starObj = getCurrentStarForChat();
+  if (starObj) {
+    markStarAsSeen(starObj.id, true);
+  }
+  const banner = document.getElementById("matchBanner");
+  banner.classList.remove("show");
+  state.manualChatOpen = false;
+  renderStarList();
+  if (state.lockedStarId && state.partner) {
+    state.bannerDismissedKey = `${state.lockedStarId}_${state.partner.name}`;
+  }
+};
+
+const startBtn = document.getElementById("startBtn");
+if (startBtn) {
+  startBtn.onclick = function () {
+    const nameSelect = document.getElementById("userName");
+    const roomInput = document.getElementById("roomCode");
+    const modeSelect = document.getElementById("initialMode");
+    const overlay = document.getElementById("setupOverlay");
+
+    const chosenName = nameSelect && nameSelect.value ? nameSelect.value : "Emre";
+    applyThemeByUser(chosenName);
+
+    if (roomInput && roomInput.value.trim()) state.roomCode = roomInput.value.trim().toUpperCase();
+    if (modeSelect && modeSelect.value) state.mode = modeSelect.value;
+
+    state.starChatsByRoom = loadLocalChats();
+    state.lastSeenStarTimestamp = loadSeenTimestamps();
+    syncAppIconBadge();
+    updateModeUI();
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.style.display = "none";
+    }
+
+    resizeCanvas();
+    initLocationBackground();
+
+    if (!state.loopStarted) {
+      state.loopStarted = true;
+      loop();
+    }
+
+    syncToCloud(false);
+    pollCloud();
+    if (!window._skySyncTimer) {
+      window._skySyncTimer = setInterval(() => syncToCloud(false), 1500);
+      window._skyPollTimer = setInterval(pollCloud, 2500);
+    }
+  };
+}
+
+document.getElementById("tabShared").onclick = () => { state.mode = "shared"; updateModeUI(); };
+document.getElementById("tabLive").onclick = () => { state.mode = "live"; updateModeUI(); };
+
+document.getElementById("sendNoteBtn").onclick = async () => {
+  const input = document.getElementById("loveNoteInput");
+  const txt = input.value.trim();
+  if (!txt) return;
+
+  const starObj = getCurrentStarForChat();
+  const now = Date.now();
+  const msgObj = {
+    id: "m_" + now + "_" + Math.random().toString(36).slice(2, 7),
+    starId: starObj.id,
+    byId: state.userId,
+    by: state.userName,
+    text: txt,
+    createdAt: now,
+    expiresAt: now + TWENTY_FOUR_HOURS_MS
+  };
+
+  const existing = pruneExpiredMessages(state.starChatsByRoom[starObj.id] || []);
+  existing.push(msgObj);
+  state.starChatsByRoom[starObj.id] = existing;
+  state.lastSeenStarTimestamp[starObj.id] = now;
+  saveLocalChats();
+  saveSeenTimestamps();
+
+  input.value = "";
+  renderStarChatFeed();
+  renderStarList();
+
+  if (FIREBASE_URL) {
+    const base = FIREBASE_URL.replace(/\/+$/, "");
+    const room = encodeURIComponent(state.roomCode);
+    try {
+      await fetch(`${base}/rooms/${room}/starChats/${encodeURIComponent(starObj.id)}/${encodeURIComponent(msgObj.id)}.json`, {
+        method: "PUT",
+        body: JSON.stringify(msgObj)
+      });
+    } catch (e) {}
+  }
+};
+</script>
+</body>
+</html>
